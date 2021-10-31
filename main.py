@@ -25,22 +25,25 @@ def line(a_line, table):
     else:
         table[word] = {}
         table[word][pos] = 1
+# format table[word][pos] this given the word and pos is probability that a certain word is
+
 def line2(pos, previous, table):
-    #checks if previous is in the table
+    # checks if previous is in the table
     if previous in table.keys():
-        #checks if it's in the previous dict
+        # checks if it's in the previous dict
         if pos in table[previous].keys():
-            #if both are true it will add 1 to the value
+            # if both are true it will add 1 to the value
             table[previous][pos] += 1
         else:
-            #else it will create a dict within previous
+            # else it will create a dict within previous
             table[previous][pos] = 1
     else:
-        #will create the previous key with pos key inside and have it start at value 1
+        # will create the previous key with pos key inside and have it start at value 1
         table[previous] = {}
         table[previous][pos] = 1
-# THREE FUNDAMENTAL TOMMYS AT THE EXACT SAME TIME PENIS
 
+
+# the format for finding a proability emissiontable[previous part of speech][next part of speech] percent chance that previous pos leads to next
 
 # method for creating the emission probability table
 def emission(file, table):
@@ -69,32 +72,30 @@ def probability(dict):
 
 # creates the transition probabilities
 def transition(file, table):
-    #opens the file
+    # opens the file
     a_file = open(file, 'r')
-    #converts into list of strings
+    # converts into list of strings
     lines = a_file.readlines()
-    #sets previous pos to IN though it ruins data set a tiny bit, there are so many samples it's insignificant
-    previous = "IN"
-    #iterates through the list of lines
+    # sets previous pos to "." Period will signify the beginning and the end of a sentence
+    previous = "."
+    # iterates through the list of lines
     for a_line in lines:
-        #if the line is blank then it skips the line
+        # if the line is blank then it skips the line
         if a_line.isspace():
             continue
         else:
-            #extracts the pos from the line
+            # extracts the pos from the line
             values = a_line.split()
             pos = values[1]
-            #calls upon the method function to insert the pos into the table
+            # calls upon the method function to insert the pos into the table
             line2(pos, previous, table)
             previous = pos
     probability(table)
 
 
-#so we now have the transition and probability tables
-#now we must make the viterbi algorithm
-
-
-
+# so we now have the transition and probability tables
+# now we must make the viterbi algorithm
+def viterbi(input, output, emstable,transtable, number):
 
 
 
