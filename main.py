@@ -1,4 +1,5 @@
 from pathlib import Path
+import operator
 
 # creates
 emissiontable = {}
@@ -25,6 +26,8 @@ def line(a_line, table):
     else:
         table[word] = {}
         table[word][pos] = 1
+
+
 # format table[word][pos] this given the word and pos is probability that a certain word is
 
 def line2(pos, previous, table):
@@ -95,11 +98,24 @@ def transition(file, table):
 
 # so we now have the transition and probability tables
 # now we must make the viterbi algorithm
-def viterbi(input, output, emstable,transtable, number):
-
-
-
-
+def viterbi(inputfile, etable, ttable, output):
+    file = open(inputfile, 'r')
+    lines = file.readlines()
+    previous = "."
+    # iterates through the list
+    number = 0
+    for line in lines:
+        # creates a dictionary called values
+        values = {}
+        for i in etable[line]:
+            # multiplies the emission probability with the corresponding transition probability
+            x = {i: (etable[line][i] * ttable[previous][i])}
+            # adds the value to dict values, the key is the part of speech
+            values.update(x)
+        # this adds the max value of the list to the output in the list it will be a part of speech
+        output[number] = values[max(values, key=values.get)]
+        previous = line
+        number += 1
 
 
 emission("WSJ_02-21.pos", emissiontable)
