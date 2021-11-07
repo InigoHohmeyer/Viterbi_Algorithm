@@ -95,27 +95,83 @@ def transition(file, table):
             previous = pos
     probability(table)
 
+# this function goes through all the current "paths"(lists made of pos) and adds a part of speech to the end of each
+# one it creates a new path for each new pos. So if there are 20 current paths and 20 current parts of speech we have
+# 400 new paths each path has probability as its first value
+def list(paths, emtable, trtable, current):
+    newpaths = []
+    b = 0
+    for i in paths:
 
-# so we now have the transition and probability tables
-# now we must make the viterbi algorithm
-def viterbi(inputfile, etable, ttable, output):
+
+        # this will occur if the word is not in the emission table it's an OOV(out of vocabulary word) and we will simply substitute "run"
+        #this has no effect on the probabilities it will get us through the necessary pos
+        if current not in emtable:
+            for j in emtable["run"]:
+                newpaths[b] = paths[i]
+                newpaths[b].append(j)
+                newpaths[b][0] *= (1 / 1000)
+                b += 1
+        else:
+            for j in emtable[current]:
+                newpaths[b] = paths[i]
+                newpaths[b].append(j)
+                #this means that
+                if j not in trtable[newpaths[-1]]:
+                    newpaths[b][0] = 0
+                else:
+                    newpaths[b][0] *= emtable[current][j] * trtable[newpaths[-1]][j]
+                b += 1
+
+    paths = newpaths
+# this function goes through all the paths and makes sure only the biggest path goes to each part of speech
+def clean(paths, current, emtable):
+    max = 0
+    maxlist = []
+    #iterates through the table because this will have all the parts of speech
+    for i in emtable[current]:
+        for j in paths:
+            #will be used for the first list encountered with
+            if max == 0 & paths[j][-1] == i:
+                max = paths[j][0]
+                maxlist = paths[j]
+            else:
+                if max > paths[j][-1]:
+                    del paths[j]
+                if paths[j][0] > max:
+                    del paths[maxlist]
+                    max = paths[j][0]
+                    maxlist = paths[j]
+        else:
+            continue
+def viterbi(inputfile, emtable, trtable, outputfile):
+    paths = []
     file = open(inputfile, 'r')
     lines = file.readlines()
-    previous = "."
-    # iterates through the list
-    number = 0
     for line in lines:
-        # creates a dictionary called values
-        values = {}
-        for i in etable[line]:
-            # multiplies the emission probability with the corresponding transition probability
-            x = {i: (etable[line][i] * ttable[previous][i])}
-            # adds the value to dict values, the key is the part of speech
-            values.update(x)
-        # this adds the max value of the list to the output in the list it will be a part of speech
-        output[number] = values[max(values, key=values.get)]
-        previous = line
-        number += 1
+        if line.isspace():
+            continue
+        else:
+            list(paths, emtable, trtable, line)
+            clean(paths, line, emtable)
+    max = 0
+    maxpath = []
+    for i in paths:
+        if paths[i][0] > max:
+            max = paths[i][0]
+            maxpath = paths[i]
+    with open('outputfile', 'w') as f:
+        i = 0
+        for line in lines:
+            if line.isspace():
+                continue
+            else:
+                f.write(line + "    " + maxpath[i])
+                f.write("\n")
+        i += 1
+
+
+
 
 
 emission("WSJ_02-21.pos", emissiontable)
